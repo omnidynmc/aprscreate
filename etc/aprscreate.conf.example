@@ -1,0 +1,53 @@
+app {
+  bookmarks {
+    load "remove module lib/libsmpp.so";
+  } # opentest.bookmarks
+
+  prompt "aprscreate> ";
+
+  log {
+    level 7;
+  } # log
+
+  stompstats {
+    source "aprscreate";
+    instance "prod";
+    interval 30;
+    hosts "10.0.1.3:61613";
+    login "aprscreate-stompstats-prod";
+    passcode "aprscreate-stompstats-prod";
+    client-id "prod";
+    destination "/topic/stats.devel";
+  } # stompstats
+
+  digis "TCPIP*,qAC,N6NAR";
+
+  message {
+    callsign "N6NAR";
+    session.expire 300;
+  } # app.message
+
+  threads {
+    worker 1 {
+      sql {
+        host "aprsdb-mrw";
+        user "openaprs";
+        pass "OpenAPRS9378";
+        database "openaprs";
+      } # app.threads.worker.sql
+
+      stomp {
+        hosts "10.0.1.3:61613";
+        login "aprscreate-worker-dev";
+        passcode "aprscreate-worker-dev";
+        client-id "aprscreate-worker-prod";
+        destination "/queue/feeds.aprs.*";
+      } # app.threads.worker.stomp
+    } # app.threads.worker
+  } # app.threads
+
+#  modules {
+#    load [ "lib/libmodstomp.so" ];
+#  } # modules
+
+} # app
